@@ -1,39 +1,42 @@
 import Foundation
 import UIKit
 
+public enum UpdateResult {
+    case updateAvailable(String)
+    case upToDate
+    case error(Error)
+}
+
 @MainActor
-public final class VersionChecker {
+public final class AppUpdateKit {
+    public static let shared = AppUpdateKit()
     private init() {}
 
-    /// One-liner method to check for update and show alert
-    public static func check(appID: String, on viewController: UIViewController) {
-        let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0"
+    public func checkForUpdate(appID: String = "<YOUR_APP_ID>", completion: @escaping (UpdateResult) -> Void) {
+        guard let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
+            completion(.error(NSError(domain: "AppUpdateKit", code: -1, userInfo: [NSLocalizedDescriptionKey: "Current version not found"])))
+            return
+        }
         let lookupURL = URL(string: "https://itunes.apple.com/lookup?id=\(appID)&timestamp=\(Date().timeIntervalSince1970)")!
-        let appStoreURL = URL(string: "https://apps.apple.com/app/id\(appID)&timestamp=\(Date().timeIntervalSince1970)")!
 
-        let task = URLSession.shared.dataTask(with: lookupURL) { data, _, _ in
+        let task = URLSession.shared.dataTask(with: lookupURL) { data, _, error in
+            if let error = error {
+                completion(.error(error))
+                return
+            }
             guard let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let results = json["results"] as? [[String: Any]],
                   let storeVersion = results.first?["version"] as? String
-            else { return }
+            else {
+                completion(.error(NSError(domain: "AppUpdateKit", code: -2, userInfo: [NSLocalizedDescriptionKey: "Failed to parse App Store response"])))
+                return
+            }
 
             if storeVersion.compare(currentVersion, options: .numeric) == .orderedDescending {
-                DispatchQueue.main.async {
-                    let alert = UIAlertController(
-                        title: "Update Available",
-                        message: "A new version of the app is available. Please update to continue.",
-                        preferredStyle: .alert
-                    )
-
-                    alert.addAction(UIAlertAction(title: "Update", style: .default) { _ in
-                        UIApplication.shared.open(appStoreURL)
-                    })
-
-                    alert.addAction(UIAlertAction(title: "Later", style: .cancel))
-
-                    viewController.present(alert, animated: true)
-                }
+                completion(.updateAvailable(storeVersion))
+            } else {
+                completion(.upToDate)
             }
         }
         task.resume()
