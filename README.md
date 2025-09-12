@@ -48,7 +48,9 @@ A lightweight Swift package to handle in-app update prompts, version checks, and
 Example:
 ```swift
 import AppUpdateKit
+```
 
+```swift
 AppUpdateKit.shared.checkForUpdate { result in
     switch result {
     case .updateAvailable(let version):
