@@ -38,7 +38,7 @@ A lightweight Swift package to handle in-app update prompts, version checks, and
 1. In Xcode, go to **File > Add Packages...**
 2. Enter the repository URL:
    ```swift
-   https://github.com/vishalvaghasiya-ios/AppUpdateKit.git (Version 1.0.0)
+   https://github.com/vishalvaghasiya-ios/AppUpdateKit.git
    ```
 3. Choose the latest release version.
 4. Add the dependency to your target.
