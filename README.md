@@ -111,8 +111,5 @@ Current Version: **1.0.0 (Initial Release)**
 - The update dialog UI is customizable to fit your app design.
 
 ## 👤 Author
-**Vishal Vaghasiya**
+Vishal Vaghasiya  
 GitHub: [vishalvaghasiya-ios](https://github.com/vishalvaghasiya-ios)
-
-## 📄 License
-AppUpdateKit is available under the MIT license. See the LICENSE file for details.
